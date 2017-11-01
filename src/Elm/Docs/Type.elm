@@ -1,6 +1,8 @@
 module Elm.Docs.Type exposing
   ( Type(..)
   , decoder
+  , parse
+  , tipe
   )
 
 {-| This is specifically for handling the types that appear in
@@ -9,7 +11,7 @@ arbitrary type signatures with creative indentation (e.g. newlines
 and comments) this library will not do what you want. Instead,
 check out the source code and go from there. It's not too tough!
 
-@docs Type, decoder
+@docs Type, decoder, parse, tipe
 
 -}
 
@@ -70,6 +72,8 @@ decoderHelp string =
 -- PARSE TYPES
 
 
+{-| Parse Elm code to a resulting type
+-}
 parse : String -> Result Parser.Error Type
 parse source =
   Parser.run tipe source
@@ -78,7 +82,8 @@ parse source =
 
 -- FUNCTIONS
 
-
+{-| Parser used to parse type definitions
+-}
 tipe : Parser Type
 tipe =
   Parser.lazy <| \_ ->
@@ -110,6 +115,7 @@ arrow =
 
 tipeTerm : Parser Type
 tipeTerm =
+  Parser.lazy <| \_ ->
   Parser.oneOf
     [ Parser.map Var lowVar
     , Parser.succeed Type
@@ -131,6 +137,7 @@ chompArgs revArgs =
 
 term : Parser Type
 term =
+  Parser.lazy <| \_ ->
   Parser.oneOf
     [ Parser.map Var lowVar
     , Parser.map (\name -> Type name []) qualifiedCapVar
@@ -145,6 +152,7 @@ term =
 
 record : Parser Type
 record =
+  Parser.lazy <| \_ ->
   Parser.succeed (\ext fields -> Record fields ext)
     |. Parser.symbol "{"
     |. spaces
@@ -173,6 +181,7 @@ ext =
 
 field : Parser (String, Type)
 field =
+  Parser.lazy <| \_ ->
   Parser.succeed (,)
     |= lowVar
     |. spaces
